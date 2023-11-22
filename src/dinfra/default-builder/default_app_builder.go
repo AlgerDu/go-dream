@@ -47,7 +47,7 @@ func (builder *DefaultAppBuilder) UseConfig(options *extgookit.ConfigOptions) *D
 }
 
 // 使用默认的 logger ；可以自行注入不同的实现
-func (builder *DefaultAppBuilder) UseLogger(options *extgookit.ConfigOptions) *DefaultAppBuilder {
+func (builder *DefaultAppBuilder) UseLogger() *DefaultAppBuilder {
 	dinfra.DI_ConfigOptions(builder.container, "logger", extlogrus.NewDefaultOptions())
 	di.AddSingleton(builder.container, extlogrus.New)
 	return builder
