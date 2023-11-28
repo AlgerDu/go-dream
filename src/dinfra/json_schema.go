@@ -1,8 +1,9 @@
 package dinfra
 
 type (
-	JsonPropertyType string
+	JsonPropertyType string // json schema 支持的属性类型
 
+	// json schema 属性描述
 	JsonProperty struct {
 		Type        JsonPropertyType `json:"type"`
 		Title       *string          `json:"title"`       // 最好是简短的
@@ -29,22 +30,23 @@ type (
 		Const   any   `json:"const"`   // 常量，固定值
 	}
 
+	// json schema
 	JsonSchema struct {
 		JsonProperty
 
-		Schema *string `json:"$schema"`
-		ID     *string `json:"$id"`
+		Schema *string `json:"$schema"` // 使用的 schema 版本
+		ID     *string `json:"$id"`     //
 	}
 )
 
 var (
-	JPT_Number  JsonPropertyType = "number"
-	JPT_Integer JsonPropertyType = "integer"
-	JPT_Boolean JsonPropertyType = "boolean"
-	JPT_String  JsonPropertyType = "string"
-	JPT_Object  JsonPropertyType = "object"
-	JPT_Array   JsonPropertyType = "array"
-	JPT_Null    JsonPropertyType = "null"
+	JPT_Number  JsonPropertyType = "number"  // 整数类型
+	JPT_Integer JsonPropertyType = "integer" // 数值类型
+	JPT_Boolean JsonPropertyType = "boolean" // 布尔
+	JPT_String  JsonPropertyType = "string"  // 字符串
+	JPT_Object  JsonPropertyType = "object"  // 对象
+	JPT_Array   JsonPropertyType = "array"   // 数组
+	JPT_Null    JsonPropertyType = "null"    // 空
 
-	JPT_Datetime JsonPropertyType = "datetime"
+	JPT_Datetime JsonPropertyType = "datetime" // 时间(扩展定义)
 )
