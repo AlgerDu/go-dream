@@ -4,21 +4,36 @@ type (
 	JsonPropertyType string
 
 	JsonProperty struct {
-		Type        JsonPropertyType        `json:"type"`
-		Title       string                  `json:"title"`
-		Description string                  `json:"description"`
-		Properties  map[string]JsonProperty `json:"properties"`
-		Required    bool                    `json:"required"`
-		Minimum     int64                   `json:"minimum"`
-		Maximum     int64                   `json:"maximum"`
-		MaxLength   int64                   `json:"maxLength"`
-		MinLength   int64                   `json:"minLength"`
-		Pattern     string                  `json:"pattern"`
-		Enum        []any                   `json:"enum"`
+		Type        JsonPropertyType `json:"type"`
+		Title       *string          `json:"title"`       // 最好是简短的
+		Description *string          `json:"description"` // 说明，更长更加详细
+
+		MaxLength *int64  `json:"maxLength"` // string 最大长度，非负
+		MinLength *int64  `json:"minLength"` // string 最小长度，非负
+		Pattern   *string `json:"pattern"`   // string 必须符合对应的正则表达式
+
+		MultipleOf *int64 `json:"multipleOf"` // number integer 给定数字的倍数
+		Minimum    *int64 `json:"minimum"`    // number integer 最小值 >=
+		Maximum    *int64 `json:"maximum"`    // number integer 最大值 <=
+
+		Properties map[string]JsonProperty `json:"properties"`
+		Required   []string                `json:"required"` // object 必须属性
+
+		Items       *JsonPropertyType `json:"items"`       // array 列表项的说明
+		MinItems    *int64            `json:"minItems"`    // array 数组最小长度
+		MaxItems    *int64            `json:"maxItems"`    // array 数组最大长度
+		UniqueItems *bool             `json:"uniqueItems"` // array 数组每个元素唯一
+
+		Enum    []any `json:"enum"`
+		Default any   `json:"default"` // 该值不用于在验证过程中填充缺失值。文档生成器或表单生成器等非验证工具可能会使用此值提示用户如何使用该值。
+		Const   any   `json:"const"`   // 常量，固定值
 	}
 
 	JsonSchema struct {
 		JsonProperty
+
+		Schema *string `json:"$schema"`
+		ID     *string `json:"$id"`
 	}
 )
 
@@ -29,5 +44,7 @@ var (
 	JPT_String  JsonPropertyType = "string"
 	JPT_Object  JsonPropertyType = "object"
 	JPT_Array   JsonPropertyType = "array"
-	JPT_Date    JsonPropertyType = "date"
+	JPT_Null    JsonPropertyType = "null"
+
+	JPT_Datetime JsonPropertyType = "datetime"
 )
