@@ -1,6 +1,10 @@
 package dinfra
 
-import di "github.com/AlgerDu/go-di/src"
+import (
+	"reflect"
+
+	di "github.com/AlgerDu/go-di/src"
+)
 
 type (
 	OnChangeFunc func() error
@@ -25,6 +29,11 @@ func DI_ConfigOptions[insType any](
 	ins insType,
 	opts ...func(insType),
 ) {
+
+	if reflect.TypeOf(ins).Kind() == reflect.Func {
+		panic("ins can not be a func.")
+	}
+
 	di.AddScope(services, func(config Config) insType {
 		config.BindStruct(path, ins)
 		if len(opts) > 0 {
