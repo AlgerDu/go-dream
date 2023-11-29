@@ -4,6 +4,10 @@ import "github.com/labstack/echo/v4"
 
 // 针对 echo 的一些简单封装
 
+const (
+	HttpHeader_XRequestID = "X-Request-Id"
+)
+
 type (
 	// 自定义中间件接口，方便实现自定义的中间件（ echo 原始的中间件实现方式，看起来比较难看，仅此而已）
 	HttpMiddleware interface {

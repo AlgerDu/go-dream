@@ -5,8 +5,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Bind(c echo.Context, dst any) error {
-	return c.Bind(dst)
+func Bind[DstType any](c echo.Context) (*DstType, error) {
+	data := new(DstType)
+	err := c.Bind(data)
+
+	return data, err
 }
 
 func SetResult(c echo.Context, code int) error {

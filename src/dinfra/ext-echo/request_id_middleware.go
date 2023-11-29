@@ -6,27 +6,33 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type RequestIDMiddleware struct {
-	logger dinfra.Logger
-}
+type (
+	RequestIDMiddleware struct {
+		logger dinfra.Logger
+	}
+)
 
 func NewRequestIDMiddleware(
 	logger dinfra.Logger,
 ) *RequestIDMiddleware {
 
 	return &RequestIDMiddleware{
-		logger: logger,
+		logger: logger.WithField(dinfra.LogField_Source, "RequestIDMiddleware"),
 	}
 }
 
-func (middleware *RequestIDMiddleware) Handle(context echo.Context, next echo.HandlerFunc) error {
+func (middleware *RequestIDMiddleware) Handle(c echo.Context, next echo.HandlerFunc) error {
 
-	requestID := context.Request().Header.Get("X-Request-ID")
-	if requestID == "" {
-		requestID = uuid.NewString()
+	req := c.Request()
+	res := c.Response()
+	rid := req.Header.Get(dinfra.HttpHeader_XRequestID)
+	if rid == "" {
+		rid = uuid.NewString()
+		middleware.logger.WithField(dinfra.HttpHeader_XRequestID, rid).Info("generate htttp request id")
 	}
 
-	SetRequestID(context, requestID)
+	res.Header().Set(dinfra.HttpHeader_XRequestID, rid)
+	SetRequestID(c, rid)
 
-	return next(context)
+	return next(c)
 }
