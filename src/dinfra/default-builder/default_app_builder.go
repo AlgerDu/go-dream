@@ -42,13 +42,13 @@ func (builder *DefaultAppBuilder) Build() (dinfra.App, error) {
 // 使用默认的 config ；可以自行注入不同的实现
 func (builder *DefaultAppBuilder) UseConfig(options *extgookit.ConfigOptions) *DefaultAppBuilder {
 	di.AddInstance(builder.container, options)
-	di.AddSingleton(builder.container, extgookit.New)
+	di.AddSingletonFor[dinfra.Config](builder.container, extgookit.New)
 	return builder
 }
 
 // 使用默认的 logger ；可以自行注入不同的实现
 func (builder *DefaultAppBuilder) UseLogger() *DefaultAppBuilder {
 	dinfra.DI_ConfigOptions(builder.container, "logger", extlogrus.NewDefaultOptions())
-	di.AddSingleton(builder.container, extlogrus.New)
+	di.AddSingletonFor[dinfra.Logger](builder.container, extlogrus.New)
 	return builder
 }
