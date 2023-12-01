@@ -5,6 +5,7 @@ type (
 
 	// json schema 属性描述
 	JsonProperty struct {
+		Name        string           `json:"name"` // 为了方便使用，兼容数组和 MAP 的存储形式
 		Type        JsonPropertyType `json:"type"`
 		Title       *string          `json:"title"`       // 最好是简短的
 		Description *string          `json:"description"` // 说明，更长更加详细
@@ -17,8 +18,8 @@ type (
 		Minimum    *int64 `json:"minimum"`    // number integer 最小值 >=
 		Maximum    *int64 `json:"maximum"`    // number integer 最大值 <=
 
-		Properties map[string]JsonProperty `json:"properties"`
-		Required   []string                `json:"required"` // object 必须属性
+		Properties map[string]*JsonProperty `json:"properties"`
+		Required   []string                 `json:"required"` // object 必须属性
 
 		Items       *JsonPropertyType `json:"items"`       // array 列表项的说明
 		MinItems    *int64            `json:"minItems"`    // array 数组最小长度
@@ -32,7 +33,7 @@ type (
 
 	// json schema
 	JsonSchema struct {
-		JsonProperty
+		*JsonProperty
 
 		Schema *string `json:"$schema"` // 使用的 schema 版本
 		ID     *string `json:"$id"`     //
@@ -50,3 +51,9 @@ var (
 
 	JPT_Datetime JsonPropertyType = "datetime" // 时间(扩展定义)
 )
+
+func NewJsonSchema() *JsonSchema {
+	return &JsonSchema{
+		JsonProperty: &JsonProperty{},
+	}
+}
