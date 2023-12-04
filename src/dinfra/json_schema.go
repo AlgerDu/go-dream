@@ -54,6 +54,9 @@ var (
 
 func NewJsonSchema() *JsonSchema {
 	return &JsonSchema{
-		JsonProperty: &JsonProperty{},
+		JsonProperty: &JsonProperty{
+			Properties: map[string]*JsonProperty{},
+			Required:   []string{},
+		},
 	}
 }
