@@ -73,6 +73,7 @@ func structToMap(v reflect.Value) (map[string]any, error) {
 		}
 
 		field := vt.Field(i)
+		fieldName := Strings_FirstToLower(field.Name)
 
 		if field.Anonymous {
 			for k, v := range tmp.(map[string]any) {
@@ -81,7 +82,7 @@ func structToMap(v reflect.Value) (map[string]any, error) {
 				}
 			}
 		} else {
-			out[field.Name] = tmp
+			out[fieldName] = tmp
 		}
 	}
 
