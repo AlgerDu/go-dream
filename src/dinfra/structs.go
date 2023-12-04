@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func MapToStruct[DstType any](from map[string]any) (*DstType, error) {
+func MapToStruct[DstType any](from any) (*DstType, error) {
 	to := new(DstType)
 	err := mapstructure.Decode(from, to)
 	return to, err

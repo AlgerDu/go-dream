@@ -19,7 +19,8 @@ type (
 		Maximum    *int64 `json:"maximum"`    // number integer 最大值 <=
 
 		Properties map[string]*JsonProperty `json:"properties"`
-		Required   []string                 `json:"required"` // object 必须属性
+		Required   []string                 `json:"required"`   // object 必须属性
+		Updateable []string                 `json:"updateable"` // object 可以被更新的属性
 
 		Items       *JsonPropertyType `json:"items"`       // array 列表项的说明
 		MinItems    *int64            `json:"minItems"`    // array 数组最小长度
