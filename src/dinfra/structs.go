@@ -13,9 +13,27 @@ type (
 	}
 )
 
-func MapToStruct[DstType any](from any) (*DstType, error) {
-	to := new(DstType)
-	err := mapstructure.Decode(from, to)
+func MapToStruct[DstType any](from any, toOpt ...*DstType) (*DstType, error) {
+
+	var to *DstType
+	if len(toOpt) >= 1 {
+		to = toOpt[0]
+	} else {
+		to = new(DstType)
+	}
+
+	config := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   to,
+		Squash:   true,
+	}
+
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		return to, err
+	}
+
+	err = decoder.Decode(from)
 	return to, err
 }
 
@@ -26,7 +44,7 @@ func StructToMap(from any) (map[string]any, error) {
 	}
 
 	if v.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("ToMap only accepts struct or struct pointer; got %T", v)
+		return nil, fmt.Errorf("StructToMap only accepts struct or struct pointer; got %T", v)
 	}
 
 	return structToMap(v)
