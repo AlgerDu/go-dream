@@ -11,7 +11,7 @@
             "name": "example",
             "type": "server",
             "src": "./example/",
-            "exampleConfig": "./example/config.yml.example",
+            "configFile": "config.yml",
             "docker": {
                 "dockerfile": "./example/Dockerfile",
                 "imageName": "algerdu/go-dream/example"

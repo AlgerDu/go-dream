@@ -125,5 +125,25 @@ func buildApp(cliCtx *cli.Context, buildCtx *AppBulidContext) error {
 		return err
 	}
 
+	if buildCtx.App.ConfigFile != "" {
+		example := path.Join(cliCtx.WorkDir, buildCtx.App.Src, fmt.Sprintf("%s.example", buildCtx.App.ConfigFile))
+		dst := path.Join(cliCtx.WorkDir, buildCtx.Output, buildCtx.App.ConfigFile)
+
+		err = copyConfigFile(example, dst)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// 向目标目录复制配置文件，如果文件存在，则跳过
+func copyConfigFile(src, dst string) error {
+
+	if PathExists(dst) {
+		return nil
+	}
+
+	return CopyFile(src, dst)
 }

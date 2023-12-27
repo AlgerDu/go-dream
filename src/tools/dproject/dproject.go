@@ -11,11 +11,11 @@ type (
 
 	// 项目配置的应用，一个源码仓库下可以包含应用
 	ProjectApp struct {
-		Name          string                   // 名称
-		Type          ProjectAppType           // 应用类型
-		Src           string                   // 应用根路径（ main 文件的路径）
-		ExampleConfig string                   // 实例配置文件的路径
-		Docker        ProjectAppDockerSettings // 应用打包为 docker 时的一些配置
+		Name       string                   // 名称
+		Type       ProjectAppType           // 应用类型
+		Src        string                   // 应用根路径（ main 文件的路径）
+		ConfigFile string                   // 配置文件的名称，需要以 example 的形式放置在 src 目录下
+		Docker     ProjectAppDockerSettings // 应用打包为 docker 时的一些配置
 	}
 )
 
