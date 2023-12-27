@@ -14,7 +14,7 @@ type (
 	BuildCommandFlags struct {
 		Name      string   `flag:"usage:应用名称，为空时构建所有应用"`
 		Output    string   `flag:"usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
-		TargetOSs []string `flag:"name:os,usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
+		TargetOSs []string `flag:"name:os,usage:目标操作系统"`
 	}
 
 	BuildCommand struct {
@@ -31,7 +31,7 @@ type (
 )
 
 var (
-	defaultHelloCommandFlags = &BuildCommandFlags{
+	defaultbuildCommandFlags = &BuildCommandFlags{
 		Output: "./bin",
 	}
 
@@ -41,7 +41,7 @@ var (
 				Name:  "build",
 				Usage: "编译全部或者某个应用",
 			},
-			DefaultFlags: defaultHelloCommandFlags,
+			DefaultFlags: defaultbuildCommandFlags,
 		},
 	}
 )

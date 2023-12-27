@@ -16,7 +16,8 @@ func main() {
 				PipelineAction_LoadProject,
 			},
 		}).
-		AddCommand(buildCommand)
+		AddCommand(buildCommand).
+		AddCommand(packCommand)
 
 	app := builder.Build()
 	err := app.Run(os.Args)

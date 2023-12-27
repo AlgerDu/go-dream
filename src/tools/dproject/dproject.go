@@ -6,7 +6,7 @@ type (
 	// 应用 docker 相关的一些配置
 	ProjectAppDockerSettings struct {
 		Dockerfile string // 应用 dockerfile 文件的路径
-		ImangeName string // 应用构建的 docker 镜像的名称
+		ImageName  string // 应用构建的 docker 镜像的名称
 	}
 
 	// 项目配置的应用，一个源码仓库下可以包含应用
