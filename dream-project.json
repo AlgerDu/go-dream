@@ -1,0 +1,21 @@
+{
+    "toolVersion": "1.0",
+    "version": "1.0",
+    "apps": [
+        {
+            "name": "dproject",
+            "type": "tool",
+            "src": "./src/tools/dproject/"
+        },
+        {
+            "name": "example",
+            "type": "server",
+            "src": "./example/",
+            "exampleConfig": "./example/config.yml.example",
+            "docker": {
+                "dockerfile": "./example/Dockerfile",
+                "imageName": "algerdu/go-dream/example"
+            }
+        }
+    ]
+}
