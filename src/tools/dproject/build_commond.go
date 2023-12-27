@@ -12,9 +12,9 @@ import (
 
 type (
 	BuildCommandFlags struct {
-		Name   string `flag:"usage:应用名称，为空时构建所有应用"`
-		Output string `flag:"usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
-		//TargetOSs []string `flag:"name:os,usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
+		Name      string   `flag:"usage:应用名称，为空时构建所有应用"`
+		Output    string   `flag:"usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
+		TargetOSs []string `flag:"name:os,usage:输出路径，绝对路径或者相对于 dream-project.json 的路径"`
 	}
 
 	BuildCommand struct {
@@ -49,7 +49,7 @@ var (
 func (cmd *BuildCommand) Action(c *cli.Context) error {
 	f := c.Value.(*BuildCommandFlags)
 	project := CliContextExts_GetProject(c)
-	toBuildTargetOSs := []string{}
+	toBuildTargetOSs := f.TargetOSs
 
 	toBuildApps := []*ProjectApp{}
 
@@ -103,7 +103,7 @@ func buildApp(cliCtx *cli.Context, buildCtx *AppBulidContext) error {
 
 	if buildCtx.TargetOS != runtime.GOOS {
 		buildCtx.Output = fmt.Sprintf("%s/%s", buildCtx.Output, buildCtx.TargetOS)
-		extEnvs = append(extEnvs, "GOOS", buildCtx.TargetOS)
+		extEnvs = append(extEnvs, fmt.Sprintf("GOOS=%s", buildCtx.TargetOS))
 	}
 
 	args := []string{
