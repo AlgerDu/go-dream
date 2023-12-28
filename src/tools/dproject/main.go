@@ -11,6 +11,7 @@ func main() {
 
 	builder := cli.NewBuilder("dproject").
 		SetUsage("简易 golang 脚手架").
+		SetVersion("0.1.0.120801").
 		SetPipeline(&cli.PipelineSettings{
 			BeferCheckGlobalFlags: []cli.PipelineAction{
 				PipelineAction_LoadProject,
