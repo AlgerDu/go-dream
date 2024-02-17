@@ -1,6 +1,9 @@
 package dinfra
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 var (
 	ErrNilCache = errors.New("nil cache")
@@ -9,6 +12,7 @@ var (
 type (
 	CacheValue interface {
 		BindTo(dst any) error
+		To(dstType reflect.Type) (any, error)
 	}
 
 	Cacher interface {
