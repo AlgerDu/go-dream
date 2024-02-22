@@ -27,3 +27,18 @@ func Slice_Delete[DataType any](s []DataType, check func(DataType) bool) []DataT
 	}
 	return tmp
 }
+
+func Slice_ConvertTo[FromType any, DstType any](
+	froms []FromType,
+	converter func(FromType) (DstType, error),
+) ([]DstType, error) {
+	rst := []DstType{}
+	for _, from := range froms {
+		dst, err := converter(from)
+		if err != nil {
+			return rst, err
+		}
+		rst = append(rst, dst)
+	}
+	return rst, nil
+}
