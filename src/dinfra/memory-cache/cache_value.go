@@ -8,10 +8,6 @@ type (
 	}
 )
 
-func (value *MemoryCacheValue) BindTo(dst any) error {
-	return nil
-}
-
 func (value *MemoryCacheValue) To(dstType reflect.Type) (any, error) {
-	return nil, nil
+	return value, nil
 }

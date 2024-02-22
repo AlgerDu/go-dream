@@ -2,6 +2,7 @@ package dinfra
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -11,7 +12,6 @@ var (
 
 type (
 	CacheValue interface {
-		BindTo(dst any) error
 		To(dstType reflect.Type) (any, error)
 	}
 
@@ -26,33 +26,52 @@ type (
 		Unlock(key string)
 	}
 
-	CacheValueUpdateHandler[ValueType any] func(value *ValueType) (*ValueType, *CacheUpdateOptions, error)
-
-	CacheValueGetter[ValueType any]  func() (*ValueType, error)
-	CacheValueUpdater[ValueType any] func(hanler CacheValueUpdateHandler[ValueType]) error
-
-	CacheHashValueUpdateHandler[ValueType any] func(value *ValueType) (map[string]any, *CacheUpdateOptions, error)
-	CacheHashValueUpdater[ValueType any]       func(handler CacheHashValueUpdateHandler[ValueType]) error
-
 	CacheUpdateOptions struct {
 		Expire int64
 	}
+
+	CacheNilHandler[ValutType any]  func() (ValutType, error)
+	CacheValueGetter[ValueType any] func(nilHandler CacheNilHandler[ValueType]) (ValueType, error)
+
+	CacheValueUpdateHandler[ValueType any] func(value ValueType) (ValueType, *CacheUpdateOptions, error)
+	CacheValueUpdater[ValueType any]       func(hanler CacheValueUpdateHandler[ValueType]) error
+
+	CacheHValueUpdateHandler[ValueType any] func(value ValueType) (map[string]any, *CacheUpdateOptions, error)
+	CacheHValueUpdater[ValueType any]       func(handler CacheHValueUpdateHandler[ValueType]) error
 )
 
-func UseCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
+func valueToType[ValueType any](value CacheValue) (ValueType, error) {
+	var zero ValueType
+	vt := reflect.TypeOf(zero)
+	v, err := value.To(vt)
+	if err != nil {
+		return zero, err
+	}
 
-	getter := func() (*ValueType, error) {
+	tv, ok := v.(ValueType)
+	if ok {
+		return tv, nil
+	}
+	return zero, fmt.Errorf("value to %s error", vt.Name())
+}
+
+func UseCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
+	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
 		value, err := cacher.Get(key)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			return valueToType[ValueType](value)
 		}
-		rst := new(ValueType)
-		err = value.BindTo(rst)
-		return rst, err
+
+		if err == ErrNilCache && nilHandler != nil {
+			return nilHandler()
+		}
+
+		var zero ValueType
+		return zero, err
 	}
 
 	updater := func(hanler CacheValueUpdateHandler[ValueType]) error {
-		value, err := getter()
+		value, err := getter(nil)
 		if err != nil && err != ErrNilCache {
 			return err
 		}
@@ -76,20 +95,23 @@ func UseCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueT
 	return getter, updater
 }
 
-func UseHashCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheHashValueUpdater[ValueType]) {
-
-	getter := func() (*ValueType, error) {
+func UseHCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheHValueUpdater[ValueType]) {
+	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
 		value, err := cacher.Get(key)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			return valueToType[ValueType](value)
 		}
-		rst := new(ValueType)
-		err = value.BindTo(rst)
-		return rst, err
+
+		if err == ErrNilCache && nilHandler != nil {
+			return nilHandler()
+		}
+
+		var zero ValueType
+		return zero, err
 	}
 
-	updater := func(hanler CacheHashValueUpdateHandler[ValueType]) error {
-		value, err := getter()
+	updater := func(hanler CacheHValueUpdateHandler[ValueType]) error {
+		value, err := getter(nil)
 		if err != nil && err != ErrNilCache {
 			return err
 		}
@@ -113,20 +135,24 @@ func UseHashCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[Va
 	return getter, updater
 }
 
-func UseHashCacheIndex[ValueType any](cacher Cacher, key string, index string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
+func UseHCacheIndex[ValueType any](cacher Cacher, key string, index string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
 
-	getter := func() (*ValueType, error) {
+	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
 		value, err := cacher.GetH(key, index)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			return valueToType[ValueType](value)
 		}
-		rst := new(ValueType)
-		err = value.BindTo(rst)
-		return rst, err
+
+		if err == ErrNilCache && nilHandler != nil {
+			return nilHandler()
+		}
+
+		var zero ValueType
+		return zero, err
 	}
 
 	updater := func(hanler CacheValueUpdateHandler[ValueType]) error {
-		value, err := getter()
+		value, err := getter(nil)
 		if err != nil && err != ErrNilCache {
 			return err
 		}

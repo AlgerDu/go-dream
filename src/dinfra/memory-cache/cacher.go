@@ -15,7 +15,7 @@ type (
 	}
 )
 
-func NewMemoryCacher() *MemoryCacher {
+func New() *MemoryCacher {
 	return &MemoryCacher{
 		values:   map[string]any{},
 		lock:     sync.Mutex{},
