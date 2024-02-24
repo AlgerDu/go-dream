@@ -57,13 +57,17 @@ func valueToType[ValueType any](value CacheValue) (ValueType, error) {
 
 func UseCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
 	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
-		value, err := cacher.Get(key)
+		cacheValue, err := cacher.Get(key)
 		if err == nil {
-			return valueToType[ValueType](value)
+			return valueToType[ValueType](cacheValue)
 		}
 
 		if err == ErrNilCache && nilHandler != nil {
-			return nilHandler()
+			value, err := nilHandler()
+			if err == nil {
+				cacher.Set(key, value, 0)
+			}
+			return value, err
 		}
 
 		var zero ValueType
@@ -97,13 +101,17 @@ func UseCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueT
 
 func UseHCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[ValueType], CacheHValueUpdater[ValueType]) {
 	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
-		value, err := cacher.Get(key)
+		cacheValue, err := cacher.Get(key)
 		if err == nil {
-			return valueToType[ValueType](value)
+			return valueToType[ValueType](cacheValue)
 		}
 
 		if err == ErrNilCache && nilHandler != nil {
-			return nilHandler()
+			value, err := nilHandler()
+			if err == nil {
+				cacher.Set(key, value, 0)
+			}
+			return value, err
 		}
 
 		var zero ValueType
@@ -138,13 +146,17 @@ func UseHCache[ValueType any](cacher Cacher, key string) (CacheValueGetter[Value
 func UseHCacheIndex[ValueType any](cacher Cacher, key string, index string) (CacheValueGetter[ValueType], CacheValueUpdater[ValueType]) {
 
 	getter := func(nilHandler CacheNilHandler[ValueType]) (ValueType, error) {
-		value, err := cacher.GetH(key, index)
+		cacheValue, err := cacher.GetH(key, index)
 		if err == nil {
-			return valueToType[ValueType](value)
+			return valueToType[ValueType](cacheValue)
 		}
 
 		if err == ErrNilCache && nilHandler != nil {
-			return nilHandler()
+			value, err := nilHandler()
+			if err == nil {
+				cacher.SetH(key, map[string]any{index: value}, 0)
+			}
+			return value, err
 		}
 
 		var zero ValueType

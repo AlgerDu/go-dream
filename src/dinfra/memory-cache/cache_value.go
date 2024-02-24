@@ -9,5 +9,5 @@ type (
 )
 
 func (value *MemoryCacheValue) To(dstType reflect.Type) (any, error) {
-	return value, nil
+	return value.value, nil
 }
