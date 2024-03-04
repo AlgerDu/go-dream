@@ -137,13 +137,13 @@ func UseCache2[ValueType any](cacher Cacher, key string) (CacheValueGetter[Value
 			toUpdate = *value
 		}
 
-		if len(options) > 1 {
+		if len(options) > 0 {
 			for _, handler := range options {
 				toUpdate = handler(toUpdate)
 			}
 		}
 
-		return cacher.Set(key, value, expire)
+		return cacher.Set(key, toUpdate, expire)
 	}
 
 	return getter, updater
@@ -229,7 +229,7 @@ func UseHCache2[ValueType any](cacher Cacher, key string) (CacheValueGetter[Valu
 			toUpdate = *value
 		}
 
-		if len(options) > 1 {
+		if len(options) > 0 {
 			for _, handler := range options {
 				toUpdate = handler(toUpdate)
 			}
@@ -327,7 +327,7 @@ func UseHCacheIndex2[ValueType any](cacher Cacher, key string, index string) (Ca
 			toUpdate = *value
 		}
 
-		if len(options) > 1 {
+		if len(options) > 0 {
 			for _, handler := range options {
 				toUpdate = handler(toUpdate)
 			}
