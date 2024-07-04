@@ -12,6 +12,7 @@ type (
 
 	LoggerOptions struct {
 		MinLevel LogLevel
+		File     *RotateFileOptions
 	}
 )
 
@@ -56,14 +57,30 @@ func New(
 
 	loger := logrus.New()
 
-	loger.SetOutput(os.Stdout)
-	loger.SetLevel(levelToLogrus(options.MinLevel))
-
-	loger.SetFormatter(&logrus.TextFormatter{
+	minLevel := levelToLogrus(options.MinLevel)
+	formatter := &logrus.TextFormatter{
 		DisableColors:   true,
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05.000",
-	})
+	}
+
+	loger.SetOutput(os.Stdout)
+	loger.SetLevel(minLevel)
+	loger.SetFormatter(formatter)
+
+	if options.File != nil {
+
+		fileOptions := options.File
+		fileOptions.level = minLevel
+		fileOptions.formatter = formatter
+
+		fileHook, err := newRotateFileHook(fileOptions)
+		if err != nil {
+			panic(err)
+		}
+
+		loger.AddHook(fileHook)
+	}
 
 	return loger
 }

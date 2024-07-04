@@ -72,14 +72,13 @@ func TestMapToStruct_Zero(t *testing.T) {
 		"class": "1",
 	}
 
-	student := &student{
-		human: &human{},
-	}
+	student := &student{}
 
 	config := &mapstructure.DecoderConfig{
-		Metadata: nil,
-		Result:   student,
-		Squash:   true,
+		Metadata:   nil,
+		Result:     student,
+		Squash:     true,
+		ZeroFields: true,
 	}
 
 	decoder, err := mapstructure.NewDecoder(config)

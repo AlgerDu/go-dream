@@ -47,6 +47,7 @@ require (
 
 require (
 	github.com/AlgerDu/go-di v0.1.0-beta.3
+	github.com/dounetio/slog v0.1.1
 	github.com/mitchellh/mapstructure v1.5.0
 	golang.org/x/sys v0.15.0 // indirect
 )
