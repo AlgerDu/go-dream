@@ -21,6 +21,6 @@ type (
 )
 
 var (
-	LogField_Source string = "Source"
-	LogField_Track  string = "Track"
+	LogField_Source string = "source"
+	LogField_Track  string = "track"
 )
