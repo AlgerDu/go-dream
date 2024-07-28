@@ -303,10 +303,16 @@ type Metadata struct {
 
 // Decode takes an input structure and uses reflection to translate it to
 // the output structure. output must be a pointer to a map or struct.
-func Decode(input interface{}, output interface{}) error {
+func Decode(input interface{}, output interface{}, options ...func(config *DecoderConfig)) error {
 	config := &DecoderConfig{
 		Metadata: nil,
 		Result:   output,
+	}
+
+	if len(options) > 0 {
+		for _, option := range options {
+			option(config)
+		}
 	}
 
 	decoder, err := NewDecoder(config)
@@ -930,7 +936,8 @@ func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val re
 		}
 
 		// If Squash is set in the config, we squash the field down.
-		squash := d.config.Squash && v.Kind() == reflect.Struct && f.Anonymous
+		isStruct := v.Kind() == reflect.Struct || (v.Kind() == reflect.Pointer && v.Elem().Kind() == reflect.Struct)
+		squash := d.config.Squash && isStruct && f.Anonymous
 
 		v = dereferencePtrToStructIfNeeded(v, d.config.TagName)
 
@@ -1315,7 +1322,8 @@ func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) e
 			}
 
 			// If "squash" is specified in the tag, we squash the field down.
-			squash := d.config.Squash && fieldVal.Kind() == reflect.Struct && fieldType.Anonymous
+			isStruct := fieldVal.Kind() == reflect.Struct || (fieldVal.Kind() == reflect.Pointer && fieldVal.Elem().Kind() == reflect.Struct)
+			squash := d.config.Squash && isStruct && fieldType.Anonymous
 			remain := false
 
 			// We always parse the tags cause we're looking for other tags too
@@ -1535,7 +1543,7 @@ func dereferencePtrToStructIfNeeded(v reflect.Value, tagName string) reflect.Val
 	}
 	deref := v.Elem()
 	derefT := deref.Type()
-	if isStructTypeConvertibleToMap(derefT, true, tagName) {
+	if isStructTypeConvertibleToMap(derefT, false, tagName) {
 		return deref
 	}
 	return v
