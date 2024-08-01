@@ -18,6 +18,7 @@ type (
 	Cacher interface {
 		Set(key string, value any, expire int64) error
 		Get(key string) (CacheValue, error)
+		Delete(key string) error
 
 		SetH(key string, values map[string]any, expire int64) error // TODO 这里不应该直接定义为 map，可能是 struct 使用 hash 存储；其实需要处理
 		GetH(key string, index string) (CacheValue, error)

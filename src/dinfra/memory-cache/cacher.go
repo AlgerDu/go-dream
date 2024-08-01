@@ -41,6 +41,16 @@ func (cacher *MemoryCacher) Get(key string) (dinfra.CacheValue, error) {
 	return &MemoryCacheValue{value: value}, nil
 }
 
+func (cacher *MemoryCacher) Delete(key string) error {
+	_, exist := cacher.values[key]
+	if !exist {
+		return dinfra.ErrNilCache
+	}
+
+	delete(cacher.values, key)
+	return nil
+}
+
 func (cacher *MemoryCacher) SetH(key string, values map[string]any, expire int64) error {
 
 	cache, exist := cacher.values[key]
