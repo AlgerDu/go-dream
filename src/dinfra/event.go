@@ -10,7 +10,7 @@ import (
 type (
 	// 事件
 	Event struct {
-		TrackID  string // 可追踪 ID ；发布时生成
+		ID       string // 可追踪 ID ；发布时生成
 		Topic    string // 主题
 		Data     any    // 携带的数据，类型可能是 JSON 或者结构体
 		CreateAt int64  // 创建时间（时间戳，单位 ms）
@@ -33,7 +33,7 @@ func PublishEvent(
 	data any,
 ) (*Event, error) {
 	return eventBus.Publish(&Event{
-		TrackID:  "",
+		ID:       "",
 		Topic:    topic,
 		Data:     data,
 		CreateAt: time.Now().UnixMilli(),

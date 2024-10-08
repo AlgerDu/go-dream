@@ -24,3 +24,10 @@ var (
 	LogField_Source string = "source"
 	LogField_Track  string = "track"
 )
+
+func LoggerWithStruct(
+	logger Logger,
+	name string,
+) Logger {
+	return logger.WithField("struct", name)
+}

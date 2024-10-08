@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlgerDu/go-dream/src/dinfra"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type (
@@ -26,13 +27,14 @@ func NewMemoryEventBus(
 	logger dinfra.Logger,
 ) *MemoryEventBus {
 	return &MemoryEventBus{
-		logger: logger,
+		logger: dinfra.LoggerWithStruct(logger, "MemoryEventBus"),
 		lock:   sync.Mutex{},
 		items:  map[string][]*SubscribeItem{},
 	}
 }
 
 func (bus *MemoryEventBus) Subscribe(topic string, handler dinfra.EventHandler) (string, error) {
+	logger := bus.logger
 
 	bus.lock.Lock()
 	defer bus.lock.Unlock()
@@ -43,17 +45,22 @@ func (bus *MemoryEventBus) Subscribe(topic string, handler dinfra.EventHandler) 
 	}
 
 	id := uuid.NewString()
-
 	items = append(items, &SubscribeItem{
 		ID:      id,
 		Handler: handler,
 	})
-
 	bus.items[topic] = items
+
+	logger.WithFields(logrus.Fields{
+		"subscribeID": id,
+		"topic":       topic,
+	}).Info("subscribe event")
 	return id, nil
 }
 
 func (bus *MemoryEventBus) Unsubscribe(subscribeID string) error {
+	logger := bus.logger.WithField("subscribeID", subscribeID)
+
 	bus.lock.Lock()
 	defer bus.lock.Unlock()
 
@@ -61,18 +68,27 @@ func (bus *MemoryEventBus) Unsubscribe(subscribeID string) error {
 		for i, item := range items {
 			if item.ID == subscribeID {
 				bus.items[topic] = append(items[:i], items[i+1:]...)
+				logger.WithField("topic", topic).Info("unsubscribe event")
 				return nil
 			}
 		}
 	}
 
-	return fmt.Errorf("subscribe not exist")
+	logger.Error("subscribe id not exist")
+	return fmt.Errorf("subscribe id [%s] not exist", subscribeID)
 }
 
 func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
+	if event.ID == "" {
+		event.ID = uuid.NewString()
+	}
+
+	logger := bus.logger.WithField("eventID", event.ID)
+	logger.WithField("topic", event.Topic).Info("info")
 
 	items, exist := bus.items[event.Topic]
 	if !exist {
+		logger.Warn("there is no subscriber")
 		return event, nil
 	}
 
@@ -82,8 +98,10 @@ func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
 		for _, item := range items {
 			wg.Add(1)
 			go func(item *SubscribeItem) {
+				itemLogger := logger.WithField("subscribeID", item.ID)
 				defer func() {
 					if r := recover(); r != nil {
+						itemLogger.WithField("r", r).Error("subscriber handle event crashed")
 						wg.Done()
 						return
 					}
@@ -91,7 +109,8 @@ func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
 					wg.Done()
 				}()
 
-				item.Handler(context.TODO(), event)
+				err := item.Handler(context.TODO(), event)
+				logger.WithError(err).Info("subscriber handled")
 			}(item)
 		}
 
