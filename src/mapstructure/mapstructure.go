@@ -273,6 +273,9 @@ type DecoderConfig struct {
 	// field name or tag. Defaults to `strings.EqualFold`. This can be used
 	// to implement case-sensitive tag values, support snake casing, etc.
 	MatchName func(mapKey, fieldName string) bool
+
+	// 允许使用者可以自由的制定 fieldName 到 mapName 的映射关系；
+	ConvertName func(fieldName string) string
 }
 
 // A Decoder takes a raw interface value and turns it into structured
@@ -930,6 +933,9 @@ func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val re
 
 		tagValue := f.Tag.Get(d.config.TagName)
 		keyName := f.Name
+		if d.config.ConvertName != nil {
+			keyName = d.config.ConvertName(keyName)
+		}
 
 		if tagValue == "" && d.config.IgnoreUntaggedFields {
 			continue
