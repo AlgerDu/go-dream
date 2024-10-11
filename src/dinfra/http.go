@@ -9,9 +9,21 @@ const (
 )
 
 type (
+	Action struct {
+		Path    string
+		Method  string
+		Handler func(c echo.Context) error
+	}
+)
+
+type (
 	// 自定义中间件接口，方便实现自定义的中间件（ echo 原始的中间件实现方式，看起来比较难看，仅此而已）
 	HttpMiddleware interface {
 		Handle(context echo.Context, next echo.HandlerFunc) error
+	}
+
+	Controller interface {
+		Actions() ([]*Action, error)
 	}
 
 	// 简单包装的一个 http 服务
