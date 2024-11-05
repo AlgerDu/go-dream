@@ -41,16 +41,16 @@ func PublishEvent(
 }
 
 // 将 event 携带的数据转换为结构体
-func ConvertEventDataTo[DataType any](event *Event) (*DataType, error) {
-	if data, ok := event.Data.(*DataType); ok {
+func ConvertEventDataTo[DataType any](event *Event) (DataType, error) {
+	if data, ok := event.Data.(DataType); ok {
 		return data, nil
 	}
 
+	var data DataType
 	if jsonStr, ok := event.Data.(string); ok {
-		var data DataType
 		err := json.Unmarshal([]byte(jsonStr), &data)
-		return &data, err
+		return data, err
 	}
 
-	return nil, fmt.Errorf("convert event data err")
+	return data, fmt.Errorf("convert event data err")
 }

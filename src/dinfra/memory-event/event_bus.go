@@ -26,8 +26,11 @@ type (
 func NewMemoryEventBus(
 	logger dinfra.Logger,
 ) *MemoryEventBus {
+	logger = dinfra.LoggerWithStruct(logger, "MemoryEventBus")
+	logger.Trace("create")
+
 	return &MemoryEventBus{
-		logger: dinfra.LoggerWithStruct(logger, "MemoryEventBus"),
+		logger: logger,
 		lock:   sync.Mutex{},
 		items:  map[string][]*SubscribeItem{},
 	}
@@ -41,7 +44,7 @@ func (bus *MemoryEventBus) Subscribe(topic string, handler dinfra.EventHandler) 
 
 	items, exist := bus.items[topic]
 	if !exist {
-		items = make([]*SubscribeItem, 1)
+		items = make([]*SubscribeItem, 0)
 	}
 
 	id := uuid.NewString()
@@ -96,6 +99,9 @@ func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
 
 		var wg sync.WaitGroup
 		for _, item := range items {
+			if item == nil {
+				continue
+			}
 			wg.Add(1)
 			go func(item *SubscribeItem) {
 				itemLogger := logger.WithField("subscribeID", item.ID)
