@@ -22,10 +22,10 @@ type (
 		Required   []string                 `json:"required"`   // object 必须属性
 		Updateable []string                 `json:"updateable"` // object 可以被更新的属性
 
-		Items       *JsonPropertyType `json:"items"`       // array 列表项的说明
-		MinItems    *int64            `json:"minItems"`    // array 数组最小长度
-		MaxItems    *int64            `json:"maxItems"`    // array 数组最大长度
-		UniqueItems *bool             `json:"uniqueItems"` // array 数组每个元素唯一
+		Items       *JsonProperty `json:"items"`       // array 列表项的说明
+		MinItems    *int64        `json:"minItems"`    // array 数组最小长度
+		MaxItems    *int64        `json:"maxItems"`    // array 数组最大长度
+		UniqueItems *bool         `json:"uniqueItems"` // array 数组每个元素唯一
 
 		Enum    []any `json:"enum"`
 		Default any   `json:"default"` // 该值不用于在验证过程中填充缺失值。文档生成器或表单生成器等非验证工具可能会使用此值提示用户如何使用该值。
