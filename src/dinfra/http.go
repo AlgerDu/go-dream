@@ -10,9 +10,10 @@ const (
 
 type (
 	Action struct {
-		Path    string
-		Method  string
-		Handler func(c echo.Context) error
+		Path        string
+		Method      string
+		Handler     func(c echo.Context) error
+		Description any // 使用时可以自定义一些描述数据，方便扩展
 	}
 )
 

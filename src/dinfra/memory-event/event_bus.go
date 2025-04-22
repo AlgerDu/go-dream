@@ -81,7 +81,10 @@ func (bus *MemoryEventBus) Unsubscribe(subscribeID string) error {
 	return fmt.Errorf("subscribe id [%s] not exist", subscribeID)
 }
 
-func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
+func (bus *MemoryEventBus) Publish(
+	context context.Context,
+	event *dinfra.Event,
+) (*dinfra.Event, error) {
 	if event.ID == "" {
 		event.ID = uuid.NewString()
 	}
@@ -115,7 +118,7 @@ func (bus *MemoryEventBus) Publish(event *dinfra.Event) (*dinfra.Event, error) {
 					wg.Done()
 				}()
 
-				err := item.Handler(context.TODO(), event)
+				err := item.Handler(context, event)
 				logger.WithError(err).Info("subscriber handled")
 			}(item)
 		}
