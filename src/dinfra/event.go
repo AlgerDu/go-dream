@@ -3,6 +3,7 @@ package dinfra
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 
 var (
 	trackContextKey contextKey = "TrackID"
+	TopicSeparators            = "/"
+
+	ErrInvalidTopic = errors.New("invalid topic")
 )
 
 type (

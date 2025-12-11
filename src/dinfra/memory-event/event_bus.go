@@ -3,6 +3,7 @@ package memoryevent
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/AlgerDu/go-dream/src/dinfra"
@@ -11,15 +12,11 @@ import (
 )
 
 type (
-	SubscribeItem struct {
-		ID      string
-		Handler dinfra.EventHandler
-	}
-
 	MemoryEventBus struct {
 		logger dinfra.Logger
 		lock   sync.Mutex
-		items  map[string][]*SubscribeItem
+
+		root *Node
 	}
 )
 
@@ -32,27 +29,47 @@ func NewMemoryEventBus(
 	return &MemoryEventBus{
 		logger: logger,
 		lock:   sync.Mutex{},
-		items:  map[string][]*SubscribeItem{},
+		root:   BuildeNode(""),
 	}
 }
 
-func (bus *MemoryEventBus) Subscribe(topic string, handler dinfra.EventHandler) (string, error) {
+func (bus *MemoryEventBus) Subscribe(
+	topic string,
+	handler dinfra.EventHandler,
+) (string, error) {
 	logger := bus.logger
+
+	keys := strings.Split(topic, dinfra.TopicSeparators)
+	if len(keys) == 0 {
+		return "", dinfra.ErrInvalidTopic
+	}
 
 	bus.lock.Lock()
 	defer bus.lock.Unlock()
 
-	items, exist := bus.items[topic]
-	if !exist {
-		items = make([]*SubscribeItem, 0)
+	node, keys := FindChild(bus.root, keys)
+
+	if len(keys) > 0 {
+		for i, key := range keys {
+			if key == "#" && i != len(keys)-1 {
+				return "", fmt.Errorf("# must at last")
+			}
+
+			child := BuildeNode(key)
+			child.Topic = fmt.Sprintf("%s/%s", node.Topic, key)
+
+			node.Children[key] = child
+			node = child
+		}
 	}
 
 	id := uuid.NewString()
-	items = append(items, &SubscribeItem{
+	record := &HandlerRecord{
 		ID:      id,
 		Handler: handler,
-	})
-	bus.items[topic] = items
+	}
+
+	node.Handlers[id] = record
 
 	logger.WithFields(logrus.Fields{
 		"subscribeID": id,
@@ -61,24 +78,21 @@ func (bus *MemoryEventBus) Subscribe(topic string, handler dinfra.EventHandler) 
 	return id, nil
 }
 
-func (bus *MemoryEventBus) Unsubscribe(subscribeID string) error {
+func (bus *MemoryEventBus) Unsubscribe(
+	subscribeID string,
+) error {
 	logger := bus.logger.WithField("subscribeID", subscribeID)
 
 	bus.lock.Lock()
 	defer bus.lock.Unlock()
 
-	for topic, items := range bus.items {
-		for i, item := range items {
-			if item.ID == subscribeID {
-				bus.items[topic] = append(items[:i], items[i+1:]...)
-				logger.WithField("topic", topic).Info("unsubscribe event")
-				return nil
-			}
-		}
+	record := RemoveRecord(bus.root, subscribeID)
+	if record == nil {
+		logger.Error("subscribe id not exist")
+		return fmt.Errorf("subscribe id [%s] not exist", subscribeID)
 	}
 
-	logger.Error("subscribe id not exist")
-	return fmt.Errorf("subscribe id [%s] not exist", subscribeID)
+	return nil
 }
 
 func (bus *MemoryEventBus) Publish(
@@ -92,22 +106,24 @@ func (bus *MemoryEventBus) Publish(
 	logger := bus.logger.WithField("eventID", event.ID)
 	logger.WithField("topic", event.Topic).Info("info")
 
-	items, exist := bus.items[event.Topic]
-	if !exist {
+	records := MacthHandlers(bus.root, strings.Split(event.Topic, dinfra.TopicSeparators))
+
+	if len(records) == 0 {
 		logger.Warn("there is no subscriber")
 		return event, nil
 	}
 
-	go func(items []*SubscribeItem) {
+	go func(records []*HandlerRecord) {
 
 		var wg sync.WaitGroup
-		for _, item := range items {
-			if item == nil {
+		for _, record := range records {
+			if record == nil {
 				continue
 			}
 			wg.Add(1)
-			go func(item *SubscribeItem) {
-				itemLogger := logger.WithField("subscribeID", item.ID)
+
+			go func(record *HandlerRecord) {
+				itemLogger := logger.WithField("subscribeID", record.ID)
 				defer func() {
 					if r := recover(); r != nil {
 						itemLogger.WithField("r", r).Error("subscriber handle event crashed")
@@ -118,13 +134,15 @@ func (bus *MemoryEventBus) Publish(
 					wg.Done()
 				}()
 
-				err := item.Handler(context, event)
+				err := record.Handler(context, event)
 				logger.WithError(err).Info("subscriber handled")
-			}(item)
+			}(record)
 		}
 
 		wg.Wait()
-	}(append([]*SubscribeItem{}, items...))
+		logger.Info("event handle end")
+
+	}(records)
 
 	return event, nil
 }
