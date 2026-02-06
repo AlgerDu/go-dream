@@ -19,10 +19,12 @@ var (
 
 type (
 	contextKey string
+	EventName  string // 事件名称，方便进行过滤处理
 
 	// 事件
 	Event struct {
 		ID       string // 可追踪 ID ；发布时生成
+		Name     EventName
 		Topic    string // 主题
 		Data     any    // 携带的数据，类型可能是 JSON 或者结构体
 		CreateAt int64  // 创建时间（时间戳，单位 ms）
